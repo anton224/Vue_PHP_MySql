@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD Application Using Vue.js, PHP, & MySQL</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/7c32f5b9f8.js" crossorigin="anonymous"></script>
+    <style type="text/css">
+        #overlay{
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.6);
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Title -->
+        <div class="container-fluid">
+            <div class="row bg-dark">
+                <div class="col-lg-12">
+                    <p class="text-center text-light display-4 pt-2" style="font-size:25px"> CRUD Application Using Vue.js, PHP, & MySQL</p>
+                </div>
+            </div>
+        </div>
+        <!-- / Title -->
+        <!-- Dashboard -->
+        <div class="container">
+            <!-- Subtitle and main buttons -->
+            <div class="row mt-3">
+                <div class="col-lg-6">
+                    <h3 class="text-info"> Registered Users</h3>
+                </div>
+                <div class="col-lg-6">
+                    <button class="btn btn-info float-right" @click="showAddModal=true">
+                        <i class="fas fa-user"></i>&nbsp;&nbsp;Add New User
+                    </button>
+                </div>
+            </div>
+            <!-- / Subtitle and main buttons -->
+            <!-- Success, Error messages -->
+            <hr class="bg-info">
+            <div class="alert alert-danger" v-if="errorMsg">
+                {{ errorMsg }}
+            </div>
+            <div class="success alert-success" v-if="successMsg">
+                {{ successMsg }}
+            </div>
+            <!-- / Success, Error messages -->
+            <!-- Display Records -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                        <tr class="text-center bg-info text-light">
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="text-center" v-for="user in users">
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.phone }}</td>
+                                <td><a href="#" class="text-success" @click="showEditModal=true; selectUser(user);"><i class="fas fa-edit">
+                                </i> </a> </td>
+                                <td><a href="#" class="text-daanger" @click="showDeleteModal=true; selectUser(user);"><i class="fas fa-trash-alt">
+                                </i> </a> </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- / Display Records -->
+        </div>
+        <!-- / Dashboard -->
+        <!-- Add New User -->
+        <div id="overlay" v-if="showAddModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add New User</h5>
+                        <button type="button" class="close" @click="showAddModal=false">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form action="#" method="post">
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control form-control-lg"
+                                       placeholder="Name" v-model="newUser.name">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="email" class="form-control form-control-lg"
+                                       placeholder="Email" v-model="newUser.email">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="phone" class="form-control form-control-lg"
+                                       placeholder="Phone" v-model="newUser.phone">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-info btn-block btn-lg"
+                                        @click="showAddModal=false; addUser(); clearMsg();">Add User</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- / Add New User -->
+        <!-- Edit User -->
+        <div id="overlay" v-if="showEditModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit User</h5>
+                        <button type="button" class="close" @click="showEditModal=false">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <form action="#" method="post">
+                            <div class="form-group">
+                                <input type="text" name="name" class="form-control form-control-lg" v-model="currentUser.name">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="email" class="form-control form-control-lg" v-model="currentUser.email">
+                            </div>
+                            <div class="form-group">
+                                <input type="text" name="phone" class="form-control form-control-lg" v-model="currentUser.phone">
+                            </div>
+                            <div class="form-group">
+                                <button class="btn btn-info btn-block btn-lg"
+                                        @click="showEditModal=false; updateUser(); clearMsg();">Update User</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- / Edit User -->
+        <!-- Delete User -->
+        <div id="overlay" v-if="showDeleteModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete User</h5>
+                        <button type="button" class="close" @click="showDeleteModal=false">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                       <h4 class="text-danger">Are you sure you want to delete this user?</h4>
+                        <h5>You are deleting {{ currentUser.name }}</h5>
+                        <hr>
+                        <button class="btn btn-danger btn-lg"
+                                @click="showDeleteModal=false; deleteUser(); clearMsg();">Yes</button>
+                        &nbsp;&nbsp;&nbsp;&nbsp;
+                        <button class="btn btn-success btn-lg" @click="showDeleteModal=false">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- / Delete User -->
+    </div> <!-- Close App -->
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+
+</body>
+</html>
